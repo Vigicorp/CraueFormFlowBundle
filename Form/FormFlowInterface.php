@@ -148,6 +148,18 @@ interface FormFlowInterface {
 	 * @throws \RuntimeException If the current step is not yet known.
 	 */
 	function getCurrentStepNumber();
+	
+	/**
+	 * Return the default starting step number
+	 * @return int
+	 */
+	function getDefaultStepNumber();
+
+	/**
+	 * Define the default starting step number
+	 * @param int $defaultStepnumber Starting step number of the flow
+	 */
+	function setDefaultStepNumber($defaultStepnumber);
 
 	/**
 	 * @return string|null The label for the current step.

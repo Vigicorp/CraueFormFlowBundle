@@ -147,6 +147,11 @@ abstract class FormFlow implements FormFlowInterface {
 	 * @var int|null Is only null if not yet initialized.
 	 */
 	private $currentStepNumber = null;
+ 
+	/**
+	 * @var int Define the default step number
+	 */
+	private $defaultStepNumber = 1;
 
 	/**
 	 * @var FormInterface[]
@@ -336,6 +341,22 @@ abstract class FormFlow implements FormFlowInterface {
 		}
 
 		return $this->currentStepNumber;
+	}
+ 
+	/**
+	 * {@inheritDoc}
+	 */
+	public function getDefaultStepNumber()
+	{
+		return $this->defaultStepNumber;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public function setDefaultStepNumber($defaultStepnumber)
+	{
+		$this->defaultStepNumber = $defaultStepnumber;
 	}
 
 	public function setRevalidatePreviousSteps($revalidatePreviousSteps) {
@@ -527,7 +548,7 @@ abstract class FormFlow implements FormFlowInterface {
 	}
 
 	protected function getRequestedStepNumber() {
-		$defaultStepNumber = 1;
+		$defaultStepNumber = $this->getDefaultStepNumber();
 
 		$request = $this->getRequest();
 
