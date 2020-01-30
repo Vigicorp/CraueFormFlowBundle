@@ -25,13 +25,20 @@ class PreviousStepInvalidEvent extends FormFlowEvent {
 	protected $currentStepForm;
 
 	/**
+	 * @var FormInterface
+	 */
+	protected $invalidStepForm;
+
+	/**
 	 * @param FormFlowInterface $flow
 	 * @param FormInterface $currentStepForm
+	 * @param FormInterface $invalidStepForm
 	 * @param int $invalidStepNumber
 	 */
-	public function __construct(FormFlowInterface $flow, FormInterface $currentStepForm, $invalidStepNumber) {
+	public function __construct(FormFlowInterface $flow, FormInterface $currentStepForm, FormInterface $invalidStepForm, $invalidStepNumber) {
 		$this->flow = $flow;
 		$this->currentStepForm = $currentStepForm;
+		$this->invalidStepForm = $invalidStepForm;
 		$this->invalidStepNumber = $invalidStepNumber;
 	}
 
@@ -40,6 +47,13 @@ class PreviousStepInvalidEvent extends FormFlowEvent {
 	 */
 	public function getCurrentStepForm() {
 		return $this->currentStepForm;
+	}
+
+	/**
+	 * @return FormInterface
+	 */
+	public function getInvalidStepForm() {
+		return $this->invalidStepForm;
 	}
 
 	/**

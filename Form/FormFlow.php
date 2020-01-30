@@ -913,7 +913,7 @@ abstract class FormFlow implements FormFlowInterface {
 
 					if (!$stepForm->isValid()) {
 						if ($this->hasListeners(FormFlowEvents::PREVIOUS_STEP_INVALID)) {
-							$event = new PreviousStepInvalidEvent($this, $form, $stepNumber);
+              $event = new PreviousStepInvalidEvent($this, $form, $stepForm, $stepNumber);
 							$this->eventDispatcher->dispatch(FormFlowEvents::PREVIOUS_STEP_INVALID, $event);
 						}
 
