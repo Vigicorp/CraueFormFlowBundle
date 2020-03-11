@@ -731,6 +731,14 @@ abstract class FormFlow implements FormFlowInterface {
 		$this->saveStepData($stepData);
 	}
 
+    /**
+     * Get all forms steps
+     * @return FormInterface[]
+     */
+    protected function getStepForms() {
+        return $this->stepForms;
+    }
+
 	/**
 	 * Updates form data class with previously saved form data of all steps.
 	 */
