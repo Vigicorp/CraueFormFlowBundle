@@ -4,34 +4,55 @@ namespace Craue\FormFlowBundle\Tests;
 
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\DomCrawler\Crawler;
+use Twig\Environment;
 
 /**
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2019 Christian Raue
+ * @copyright 2011-2020 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 abstract class IntegrationTestCase extends WebTestCase {
 
+	const ENV_FLOWS_WITH_AUTOCONFIGURATION = 'flows_with_autoconfiguration';
+	const ENV_FLOWS_WITH_PARENT_SERVICE = 'flows_with_parent_service';
+
 	/**
-	 * @var Client
+	 * @var AbstractBrowser|Client|null
+	 * TODO remove Client type as soon as Symfony >= 4.3 is required
 	 */
-	protected $client;
+	protected static $client;
+
+	public function getEnvironmentConfigs() {
+		$testData = [];
+
+		foreach ([self::ENV_FLOWS_WITH_AUTOCONFIGURATION, self::ENV_FLOWS_WITH_PARENT_SERVICE] as $env) {
+			$testData[] = [$env, sprintf('config_%s.yml', $env)];
+		}
+
+		return $testData;
+	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	protected static function createKernel(array $options = []) {
-		$configFile = isset($options['config']) ? $options['config'] : 'config.yml';
+		$environment = $options['environment'] ?? self::ENV_FLOWS_WITH_AUTOCONFIGURATION;
+		$configFile = $options['config'] ?? sprintf('config_%s.yml', $environment);
 
-		return new AppKernel($configFile);
+		return new AppKernel($environment, $configFile);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	protected function setUp() {
-		$this->client = static::createClient();
+		$this->setUpClient();
+	}
+
+	protected function setUpClient() {
+		static::$client = static::createClient();
 	}
 
 	/**
@@ -43,7 +64,7 @@ abstract class IntegrationTestCase extends WebTestCase {
 	}
 
 	/**
-	 * @return \Twig_Environment
+	 * @return Environment
 	 */
 	protected function getTwig() {
 		return $this->getService('twig');
@@ -116,8 +137,8 @@ abstract class IntegrationTestCase extends WebTestCase {
 	 * @param string $expectedJson
 	 */
 	protected function assertJsonResponse($expectedJson) {
-		$this->assertEquals('application/json', $this->client->getResponse()->headers->get('Content-Type') );
-		$this->assertEquals($expectedJson, $this->client->getResponse()->getContent());
+		$this->assertEquals('application/json', static::$client->getResponse()->headers->get('Content-Type') );
+		$this->assertEquals($expectedJson, static::$client->getResponse()->getContent());
 	}
 
 	/**
@@ -129,7 +150,7 @@ abstract class IntegrationTestCase extends WebTestCase {
 		try {
 			return $crawler->filter($selector)->attr($attribute);
 		} catch (\InvalidArgumentException $e) {
-			$this->fail(sprintf("No node found for selector '%s'. Content:\n%s", $selector, $this->client->getResponse()->getContent()));
+			$this->fail(sprintf("No node found for selector '%s'. Content:\n%s", $selector, static::$client->getResponse()->getContent()));
 		}
 	}
 
@@ -139,9 +160,9 @@ abstract class IntegrationTestCase extends WebTestCase {
 	 */
 	private function getNodeText($selector, Crawler $crawler) {
 		try {
-			return $crawler->filter($selector)->text();
+			return $crawler->filter($selector)->text(null, true);
 		} catch (\InvalidArgumentException $e) {
-			$this->fail(sprintf("No node found for selector '%s'. Content:\n%s", $selector, $this->client->getResponse()->getContent()));
+			$this->fail(sprintf("No node found for selector '%s'. Content:\n%s", $selector, static::$client->getResponse()->getContent()));
 		}
 	}
 

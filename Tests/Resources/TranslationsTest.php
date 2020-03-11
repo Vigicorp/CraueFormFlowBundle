@@ -10,7 +10,7 @@ use Symfony\Component\Yaml\Yaml;
  * @group unit
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2019 Christian Raue
+ * @copyright 2011-2020 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class TranslationsTest extends TestCase {
@@ -45,11 +45,23 @@ class TranslationsTest extends TestCase {
 	public function testYamlTranslationFilesContainNoUnknownKeys() {
 		$loader = new YamlFileLoader();
 		$translations = [];
+		$localesFound = [];
 
 		foreach ($this->getTranslationFilePaths() as $filePath) {
 			list($domain, $locale) = explode('.', basename($filePath));
 			$catalogue = $loader->load($filePath, $locale, $domain);
 			$translations[$domain][$locale] = array_keys($catalogue->all($domain));
+			$localesFound[$locale] = true;
+		}
+
+		// avoid warning about not performing any assertions if there are translations for the default locale only
+		if (count(array_keys($localesFound)) === 1) {
+			// TODO remove method_exists check as soon as PHPUnit >= 7.2 is required
+			if (method_exists($this, 'expectNotToPerformAssertions')) {
+				$this->expectNotToPerformAssertions();
+			}
+
+			return;
 		}
 
 		foreach ($translations as $domain => $locales) {

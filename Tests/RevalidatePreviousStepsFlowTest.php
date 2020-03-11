@@ -9,7 +9,7 @@ use Craue\FormFlowBundle\Tests\IntegrationTestBundle\Form\RevalidatePreviousStep
  * @group integration
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2019 Christian Raue
+ * @copyright 2011-2020 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class RevalidatePreviousStepsFlowTest extends IntegrationTestCase {
@@ -23,43 +23,56 @@ class RevalidatePreviousStepsFlowTest extends IntegrationTestCase {
 		RevalidatePreviousStepsData::resetValidationCalls();
 	}
 
-	public function testRevalidatePreviousSteps_enabled() {
-		$crawler = $this->client->request('GET', $this->url('_FormFlow_revalidatePreviousSteps_enabled'));
-		$this->assertSame(200, $this->client->getResponse()->getStatusCode());
+	protected function setUpClient() {
+	}
+
+	/**
+	 * @dataProvider getEnvironmentConfigs
+	 */
+	public function testRevalidatePreviousSteps_enabled($environment, $config) {
+		static::$client = static::createClient(['environment' => $environment, 'config' => $config]);
+
+		$crawler = static::$client->request('GET', $this->url('_FormFlow_revalidatePreviousSteps_enabled'));
+		$this->assertSame(200, static::$client->getResponse()->getStatusCode());
 
 		// next -> step 2
 		$form = $crawler->selectButton('next')->form();
-		$crawler = $this->client->submit($form);
+		$crawler = static::$client->submit($form);
 
 		// trying to go to step 3, but validation changed for step 1
 		$form = $crawler->selectButton('next')->form();
-		$crawler = $this->client->submit($form);
+		$crawler = static::$client->submit($form);
 		$this->assertCurrentStepNumber(2, $crawler);
 		$this->assertContainsFormError('The form for step 1 is invalid. Please go back and try to submit it again.', $crawler);
 		$this->assertEquals(['onPreviousStepInvalid #1'], $this->getCalledEvents());
 
 		// back -> step 1
 		$form = $crawler->selectButton('back')->form();
-		$crawler = $this->client->submit($form);
+		$crawler = static::$client->submit($form);
 
 		// trying to go to step 2
 		$form = $crawler->selectButton('next')->form();
-		$crawler = $this->client->submit($form);
+		$crawler = static::$client->submit($form);
 		$this->assertCurrentStepNumber(1, $crawler);
 		$this->assertContainsFormError('Take this!', $crawler);
 	}
 
-	public function testRevalidatePreviousSteps_disabled() {
-		$crawler = $this->client->request('GET', $this->url('_FormFlow_revalidatePreviousSteps_disabled'));
-		$this->assertSame(200, $this->client->getResponse()->getStatusCode());
+	/**
+	 * @dataProvider getEnvironmentConfigs
+	 */
+	public function testRevalidatePreviousSteps_disabled($environment, $config) {
+		static::$client = static::createClient(['environment' => $environment, 'config' => $config]);
+
+		$crawler = static::$client->request('GET', $this->url('_FormFlow_revalidatePreviousSteps_disabled'));
+		$this->assertSame(200, static::$client->getResponse()->getStatusCode());
 
 		// next -> step 2
 		$form = $crawler->selectButton('next')->form();
-		$crawler = $this->client->submit($form);
+		$crawler = static::$client->submit($form);
 
 		// next -> step 3
 		$form = $crawler->selectButton('next')->form();
-		$crawler = $this->client->submit($form);
+		$crawler = static::$client->submit($form);
 		$this->assertCurrentStepNumber(3, $crawler);
 	}
 

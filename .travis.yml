@@ -7,24 +7,45 @@ php:
   - 7.3
 
 env:
-  - SYMFONY_VERSION='3.4.*'
+  - SYMFONY_VERSION='3.4.*' SYMFONY_DEPRECATIONS_HELPER='max[self]=0&max[direct]=0&max[indirect]=1'
 
-matrix:
+stages:
+  - smoke test 🕵️
+  - test
+
+jobs:
   include:
-    - php: 7.0
+    - stage: smoke test 🕵️
+      php: 7.0
       env: DEPS='lowest'
-    - php: 7.3
-      env: DEPS='unmodified'
-    - php: 7.3
-      env: SYMFONY_VERSION='3.4.*' PARAM_DB_DRIVER='pdo_sqlite' SYMFONY_DEPRECATIONS_HELPER='8'
-    - php: 7.3
-      env: SYMFONY_VERSION='4.1.*'
-    - php: 7.3
-      env: SYMFONY_VERSION='4.2.*'
-    - php: 7.3
-      env: SYMFONY_VERSION='4.3.*' MIN_STABILITY='dev'
+    -
+      php: 7.4
+      env: DEPS='unmodified' WITH_STATIC_ANALYSIS='yes'
+
+    - stage: test
+      php: 7.3
+      env: SYMFONY_VERSION='3.4.*' PARAM_DB_DRIVER='pdo_sqlite' SYMFONY_DEPRECATIONS_HELPER='max[self]=0&max[direct]=9&max[indirect]=1'
+    # TODO remove as soon as Symfony >= 4.2 is required
+    -
+      php: 7.3
+      env: SYMFONY_VERSION='3.4.*' WITH_TRANSLATION_CONTRACTS='yes' SYMFONY_DEPRECATIONS_HELPER='max[self]=0&max[direct]=0&max[indirect]=1'
+    -
+      php: 7.3
+      env: SYMFONY_VERSION='4.2.*' SYMFONY_DEPRECATIONS_HELPER='max[self]=0&max[direct]=0&max[indirect]=1'
+    -
+      php: 7.3
+      env: SYMFONY_VERSION='4.3.*'
+    -
+      php: 7.3
+      env: SYMFONY_VERSION='4.4.*'
+    -
+      php: 7.3
+      env: SYMFONY_VERSION='5.0.*'
+    -
+      php: 7.3
+      env: SYMFONY_VERSION='5.0.*' MIN_STABILITY='dev'
   allow_failures:
-    - env: SYMFONY_VERSION='4.3.*' MIN_STABILITY='dev'
+    - env: SYMFONY_VERSION='5.0.*' MIN_STABILITY='dev'
   fast_finish: true
 
 install:
@@ -44,11 +65,13 @@ before_script:
 
 script:
   # validate composer.json
-  - composer validate --strict --no-check-lock
+  - if [ -n "${WITH_STATIC_ANALYSIS:-}" ]; then composer validate --strict --no-check-lock; fi;
+  # run PHPStan
+  - if [ -n "${WITH_STATIC_ANALYSIS:-}" ]; then vendor/bin/phpstan analyse; fi;
   # run PHPUnit
   - phpdbg -qrr vendor/phpunit/phpunit/phpunit -v --coverage-clover build/logs/clover.xml
   # upload code coverage data
-  - travis_retry wget -q https://github.com/php-coveralls/php-coveralls/releases/download/v2.1.0/php-coveralls.phar && travis_retry php php-coveralls.phar -v
+  - if [ "${TRAVIS_REPO_SLUG}" = "craue/CraueFormFlowBundle" ]; then travis_retry wget -q https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar && travis_retry php php-coveralls.phar -v; fi;
 
 notifications:
   email:

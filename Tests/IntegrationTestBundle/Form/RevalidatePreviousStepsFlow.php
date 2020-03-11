@@ -10,7 +10,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2019 Christian Raue
+ * @copyright 2011-2020 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class RevalidatePreviousStepsFlow extends FormFlow implements EventSubscriberInterface {
@@ -20,6 +20,8 @@ class RevalidatePreviousStepsFlow extends FormFlow implements EventSubscriberInt
 	 */
 	public function setEventDispatcher(EventDispatcherInterface $dispatcher) {
 		parent::setEventDispatcher($dispatcher);
+
+		$dispatcher->removeSubscriber($this);
 		$dispatcher->addSubscriber($this);
 	}
 
@@ -68,6 +70,10 @@ class RevalidatePreviousStepsFlow extends FormFlow implements EventSubscriberInt
 	}
 
 	public function onPreviousStepInvalid(PreviousStepInvalidEvent $event) {
+		if ($event->getFlow() !== $this) {
+			return;
+		}
+
 		$this->logEventCall('onPreviousStepInvalid #' . $event->getInvalidStepNumber());
 	}
 

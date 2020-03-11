@@ -9,7 +9,7 @@ use Craue\FormFlowBundle\Form\FormFlowInterface;
  *
  * @author Marcus Stöhr <dafish@soundtrack-board.de>
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2019 Christian Raue
+ * @copyright 2011-2020 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class PostBindRequestEvent extends FormFlowEvent {
@@ -30,7 +30,7 @@ class PostBindRequestEvent extends FormFlowEvent {
 	 * @param int $stepNumber
 	 */
 	public function __construct(FormFlowInterface $flow, $formData, $stepNumber) {
-		$this->flow = $flow;
+		parent::__construct($flow);
 		$this->formData = $formData;
 		$this->stepNumber = $stepNumber;
 	}
