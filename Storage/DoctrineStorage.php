@@ -12,7 +12,7 @@ use Doctrine\DBAL\Types\Type;
  * Stores data in a Doctrine-managed database.
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2019 Christian Raue
+ * @copyright 2011-2020 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class DoctrineStorage implements StorageInterface {
@@ -136,7 +136,7 @@ class DoctrineStorage implements StorageInterface {
 	}
 
 	private function tableExists() {
-		return $this->schemaManager->tablesExist(self::TABLE);
+		return $this->schemaManager->tablesExist([self::TABLE]);
 	}
 
 	private function createTable() {

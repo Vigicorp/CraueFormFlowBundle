@@ -3,6 +3,7 @@
 namespace Craue\FormFlowBundle\Form;
 
 use Craue\FormFlowBundle\Event\FlowExpiredEvent;
+use Craue\FormFlowBundle\Event\FormFlowEvent;
 use Craue\FormFlowBundle\Event\GetStepsEvent;
 use Craue\FormFlowBundle\Event\PostBindFlowEvent;
 use Craue\FormFlowBundle\Event\PostBindRequestEvent;
@@ -10,6 +11,7 @@ use Craue\FormFlowBundle\Event\PostBindSavedDataEvent;
 use Craue\FormFlowBundle\Event\PostValidateEvent;
 use Craue\FormFlowBundle\Event\PreBindEvent;
 use Craue\FormFlowBundle\Event\PreviousStepInvalidEvent;
+use Craue\FormFlowBundle\Exception\AllStepsSkippedException;
 use Craue\FormFlowBundle\Exception\InvalidTypeException;
 use Craue\FormFlowBundle\Storage\DataManagerInterface;
 use Craue\FormFlowBundle\Util\StringUtil;
@@ -19,13 +21,14 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Validator\Constraints\GroupSequence;
 
 /**
  * @author Christian Raue <christian.raue@gmail.com>
  * @author Marcus Stöhr <dafish@soundtrack-board.de>
  * @author Toni Uebernickel <tuebernickel@gmail.com>
- * @copyright 2011-2019 Christian Raue
+ * @copyright 2011-2020 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 abstract class FormFlow implements FormFlowInterface {
@@ -448,10 +451,11 @@ abstract class FormFlow implements FormFlowInterface {
 	/**
 	 * @param int $stepNumber Assumed step to which skipped steps shall be applied to.
 	 * @param int $direction Either 1 (to skip forwards) or -1 (to skip backwards).
+	 * @param int $boundsReached Internal counter to avoid endlessly bouncing back and forth.
 	 * @return int Target step number with skipping applied.
 	 * @throws \InvalidArgumentException If the value of <code>$direction</code> is invalid.
 	 */
-	protected function applySkipping($stepNumber, $direction = 1) {
+	protected function applySkipping($stepNumber, $direction = 1, $boundsReached = 0) {
 		if ($direction !== 1 && $direction !== -1) {
 			throw new \InvalidArgumentException(sprintf('Argument of either -1 or 1 expected, "%s" given.', $direction));
 		}
@@ -464,11 +468,17 @@ abstract class FormFlow implements FormFlowInterface {
 			// change direction if outer bounds are reached
 			if ($direction === 1 && $stepNumber > $this->getStepCount()) {
 				$direction = -1;
+				++$boundsReached;
 			} elseif ($direction === -1 && $stepNumber < 1) {
 				$direction = 1;
+				++$boundsReached;
 			}
 
-			return $this->applySkipping($stepNumber, $direction);
+			if ($boundsReached > 2) {
+				throw new AllStepsSkippedException();
+			}
+
+			return $this->applySkipping($stepNumber, $direction, $boundsReached);
 		}
 
 		return $stepNumber;
@@ -622,8 +632,7 @@ abstract class FormFlow implements FormFlowInterface {
 		$this->setInstanceId($this->determineInstanceId());
 
 		if ($this->hasListeners(FormFlowEvents::PRE_BIND)) {
-			$event = new PreBindEvent($this);
-			$this->eventDispatcher->dispatch(FormFlowEvents::PRE_BIND, $event);
+			$this->dispatchEvent(new PreBindEvent($this), FormFlowEvents::PRE_BIND);
 		}
 
 		$this->formData = $formData;
@@ -631,8 +640,7 @@ abstract class FormFlow implements FormFlowInterface {
 		$this->bindFlow();
 
 		if ($this->hasListeners(FormFlowEvents::POST_BIND_FLOW)) {
-			$event = new PostBindFlowEvent($this, $this->formData);
-			$this->eventDispatcher->dispatch(FormFlowEvents::POST_BIND_FLOW, $event);
+			$this->dispatchEvent(new PostBindFlowEvent($this, $this->formData), FormFlowEvents::POST_BIND_FLOW);
 		}
 
 		if ($this->newInstance) {
@@ -777,8 +785,7 @@ abstract class FormFlow implements FormFlowInterface {
 				}
 
 				if ($this->hasListeners(FormFlowEvents::POST_BIND_SAVED_DATA)) {
-					$event = new PostBindSavedDataEvent($this, $this->formData, $stepNumber);
-					$this->eventDispatcher->dispatch(FormFlowEvents::POST_BIND_SAVED_DATA, $event);
+					$this->dispatchEvent(new PostBindSavedDataEvent($this, $this->formData, $stepNumber), FormFlowEvents::POST_BIND_SAVED_DATA);
 				}
 			}
 		}
@@ -791,8 +798,7 @@ abstract class FormFlow implements FormFlowInterface {
 		$form = $this->createFormForStep($this->currentStepNumber);
 
 		if ($this->expired && $this->hasListeners(FormFlowEvents::FLOW_EXPIRED)) {
-			$event = new FlowExpiredEvent($this, $form);
-			$this->eventDispatcher->dispatch(FormFlowEvents::FLOW_EXPIRED, $event);
+			$this->dispatchEvent(new FlowExpiredEvent($this, $form), FormFlowEvents::FLOW_EXPIRED);
 		}
 
 		return $form;
@@ -858,7 +864,7 @@ abstract class FormFlow implements FormFlowInterface {
 
 		if ($this->hasListeners(FormFlowEvents::GET_STEPS)) {
 			$event = new GetStepsEvent($this);
-			$this->eventDispatcher->dispatch(FormFlowEvents::GET_STEPS, $event);
+			$this->dispatchEvent($event, FormFlowEvents::GET_STEPS);
 
 			// A listener has provided the steps for this flow.
 			if ($event->isPropagationStopped()) {
@@ -915,8 +921,7 @@ abstract class FormFlow implements FormFlowInterface {
 			}
 
 			if ($this->hasListeners(FormFlowEvents::POST_BIND_REQUEST)) {
-				$event = new PostBindRequestEvent($this, $form->getData(), $this->currentStepNumber);
-				$this->eventDispatcher->dispatch(FormFlowEvents::POST_BIND_REQUEST, $event);
+				$this->dispatchEvent(new PostBindRequestEvent($this, $form->getData(), $this->currentStepNumber), FormFlowEvents::POST_BIND_REQUEST);
 			}
 
 			if ($this->revalidatePreviousSteps) {
@@ -934,8 +939,7 @@ abstract class FormFlow implements FormFlowInterface {
 
 					if (!$stepForm->isValid()) {
 						if ($this->hasListeners(FormFlowEvents::PREVIOUS_STEP_INVALID)) {
-							$event = new PreviousStepInvalidEvent($this, $form, $stepForm, $stepNumber);
-							$this->eventDispatcher->dispatch(FormFlowEvents::PREVIOUS_STEP_INVALID, $event);
+							$this->dispatchEvent(new PreviousStepInvalidEvent($this, $form, $stepNumber), FormFlowEvents::PREVIOUS_STEP_INVALID);
 						}
 
 						return false;
@@ -945,8 +949,7 @@ abstract class FormFlow implements FormFlowInterface {
 
 			if ($form->isValid()) {
 				if ($this->hasListeners(FormFlowEvents::POST_VALIDATE)) {
-					$event = new PostValidateEvent($this, $form->getData());
-					$this->eventDispatcher->dispatch(FormFlowEvents::POST_VALIDATE, $event);
+					$this->dispatchEvent(new PostValidateEvent($this, $form->getData()), FormFlowEvents::POST_VALIDATE);
 				}
 
 				return true;
@@ -968,7 +971,7 @@ abstract class FormFlow implements FormFlowInterface {
 					return true;
 				default:
 					// redirect after submit only if there are no errors for the submitted form
-					return $submittedForm->isValid();
+					return $submittedForm->isSubmitted() && $submittedForm->isValid();
 			}
 		}
 
@@ -1032,6 +1035,19 @@ abstract class FormFlow implements FormFlowInterface {
 	 */
 	protected function hasListeners($eventName) {
 		return $this->eventDispatcher !== null && $this->eventDispatcher->hasListeners($eventName);
+	}
+
+	/**
+	 * @param FormFlowEvent $event
+	 * @param string $eventName
+	 */
+	private function dispatchEvent($event, $eventName) {
+		if (Kernel::VERSION_ID < 40300) {
+			// TODO remove as soon as Symfony >= 4.3 is required
+			$this->eventDispatcher->dispatch($eventName, $event);
+		} else {
+			$this->eventDispatcher->dispatch($event, $eventName);
+		}
 	}
 
 	/**

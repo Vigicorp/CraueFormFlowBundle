@@ -7,7 +7,7 @@ use Craue\FormFlowBundle\Exception\StepLabelCallableInvalidReturnValueException;
 
 /**
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2019 Christian Raue
+ * @copyright 2011-2020 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class StepLabel {
@@ -57,7 +57,7 @@ class StepLabel {
 	 * @param string|callable|null $value
 	 * @param bool $callable
 	 */
-	private function __construct($value, $callable = false) {
+	private final function __construct($value, $callable = false) {
 		$this->setValue($value, $callable);
 	}
 

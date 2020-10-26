@@ -1,20 +1,16 @@
 imports:
   - { resource: '@CraueFormFlowBundle/Resources/config/form_flow.xml' }
   - { resource: '@IntegrationTestBundle/Resources/config/controller.xml' }
-  - { resource: '@IntegrationTestBundle/Resources/config/form_flow.xml' }
   - { resource: parameters.php }
 
 framework:
   csrf_protection: ~
   form: ~
   router:
-    resource: '%kernel.root_dir%/config/routing.yml'
+    resource: '%kernel.project_dir%/Tests/config/routing.yml'
   secret: whatever
   session:
     storage_id: session.storage.mock_file
-  templating:
-    engines:
-      - twig
   test: ~
   translator:
     fallback: en
@@ -33,3 +29,4 @@ security:
 twig:
   debug: '%kernel.debug%'
   strict_variables: '%kernel.debug%'
+  exception_controller: ~

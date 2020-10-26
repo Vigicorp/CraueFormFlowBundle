@@ -15,7 +15,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2019 Christian Raue
+ * @copyright 2011-2020 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class Demo1Flow extends FormFlow implements EventSubscriberInterface {
@@ -25,6 +25,8 @@ class Demo1Flow extends FormFlow implements EventSubscriberInterface {
 	 */
 	public function setEventDispatcher(EventDispatcherInterface $dispatcher) {
 		parent::setEventDispatcher($dispatcher);
+
+		$dispatcher->removeSubscriber($this);
 		$dispatcher->addSubscriber($this);
 	}
 
@@ -86,26 +88,50 @@ class Demo1Flow extends FormFlow implements EventSubscriberInterface {
 	}
 
 	public function onPreBind(PreBindEvent $event) {
+		if ($event->getFlow() !== $this) {
+			return;
+		}
+
 		$this->logEventCall('onPreBind');
 	}
 
 	public function onGetSteps(GetStepsEvent $event) {
+		if ($event->getFlow() !== $this) {
+			return;
+		}
+
 		$this->logEventCall('onGetSteps');
 	}
 
 	public function onPostBindSavedData(PostBindSavedDataEvent $event) {
+		if ($event->getFlow() !== $this) {
+			return;
+		}
+
 		$this->logEventCall('onPostBindSavedData #' . $event->getStepNumber());
 	}
 
 	public function onPostBindFlow(PostBindFlowEvent $event) {
+		if ($event->getFlow() !== $this) {
+			return;
+		}
+
 		$this->logEventCall('onPostBindFlow #' . $event->getFlow()->getCurrentStepNumber());
 	}
 
 	public function onPostBindRequest(PostBindRequestEvent $event) {
+		if ($event->getFlow() !== $this) {
+			return;
+		}
+
 		$this->logEventCall('onPostBindRequest');
 	}
 
 	public function onPostValidate(PostValidateEvent $event) {
+		if ($event->getFlow() !== $this) {
+			return;
+		}
+
 		$this->logEventCall('onPostValidate');
 	}
 

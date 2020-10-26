@@ -8,7 +8,7 @@ use Craue\FormFlowBundle\Util\TempFileUtil;
  * @group integration
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2019 Christian Raue
+ * @copyright 2011-2020 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class PhotoUploadFlowTest extends IntegrationTestCase {
@@ -18,8 +18,8 @@ class PhotoUploadFlowTest extends IntegrationTestCase {
 	public function testPhotoUpload() {
 		$image = __DIR__ . self::IMAGE;
 
-		$crawler = $this->client->request('GET', $this->url('_FormFlow_photoUpload'));
-		$this->assertSame(200, $this->client->getResponse()->getStatusCode());
+		$crawler = static::$client->request('GET', $this->url('_FormFlow_photoUpload'));
+		$this->assertSame(200, static::$client->getResponse()->getStatusCode());
 		$this->assertCurrentStepNumber(1, $crawler);
 		$this->assertCurrentFormData('{"photo":null,"comment":null}', $crawler);
 
@@ -32,13 +32,13 @@ class PhotoUploadFlowTest extends IntegrationTestCase {
 		TempFileUtil::addTempFile($fileFieldValue['tmp_name']);
 
 		// submit the form -> step 2
-		$crawler = $this->client->submit($form);
+		$crawler = static::$client->submit($form);
 		$this->assertCurrentStepNumber(2, $crawler);
 		$this->assertCurrentFormData('{"photo":{},"comment":null}', $crawler);
 
 		// comment -> step 3
 		$form = $crawler->selectButton('next')->form();
-		$crawler = $this->client->submit($form, [
+		$crawler = static::$client->submit($form, [
 			'photoUpload[comment]' => 'blah',
 		]);
 		$this->assertCurrentStepNumber(3, $crawler);

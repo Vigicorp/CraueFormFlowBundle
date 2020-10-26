@@ -23,12 +23,24 @@ A live demo showcasing these features is available at http://craue.de/symfony-pl
 Let Composer download and install the bundle by running
 
 ```sh
-php composer.phar require craue/formflow-bundle:~3.1
+composer require craue/formflow-bundle
 ```
 
 in a shell.
 
 ## Enable the bundle
+
+If you don't use Symfony Flex, register the bundle manually:
+
+```php
+// in config/bundles.php
+return [
+	// ...
+	Craue\FormFlowBundle\CraueFormFlowBundle::class => ['all' => true],
+];
+```
+
+Or, for Symfony 3.4:
 
 ```php
 // in app/AppKernel.php
@@ -212,6 +224,26 @@ XML
 <services>
 	<service id="myCompany.form.flow.createVehicle"
 			class="MyCompany\MyBundle\Form\CreateVehicleFlow"
+			autoconfigure="true">
+	</service>
+</services>
+```
+
+YAML
+```yaml
+services:
+    myCompany.form.flow.createVehicle:
+        class: MyCompany\MyBundle\Form\CreateVehicleFlow
+        autoconfigure: true
+```
+
+When not using autoconfiguration, you may let your flow inherit the required dependencies from a parent service.
+
+XML
+```xml
+<services>
+	<service id="myCompany.form.flow.createVehicle"
+			class="MyCompany\MyBundle\Form\CreateVehicleFlow"
 			parent="craue.form.flow">
 	</service>
 </services>
@@ -270,7 +302,7 @@ php bin/console assets:install --symlink web
 
 ### Buttons
 
-You can easily customize the default button look by using these variables to add one or more CSS classes to them:
+You can customize the default button look by using these variables to add one or more CSS classes to them:
 
 - `craue_formflow_button_class_last` will apply either to the __next__ or __finish__ button
 - `craue_formflow_button_class_finish` will specifically apply to the __finish__ button
@@ -628,8 +660,14 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class CreateVehicleFlow extends FormFlow implements EventSubscriberInterface {
 
+	/**
+	 * This method is only needed when _not_ using autoconfiguration. If it's there even with autoconfiguration enabled,
+	 * the `removeSubscriber` call ensures that subscribed events won't occur twice.
+	 * (You can remove the `removeSubscriber` call if you'll definitely never use autoconfiguration for that flow.)
+	 */
 	public function setEventDispatcher(EventDispatcherInterface $dispatcher) {
 		parent::setEventDispatcher($dispatcher);
+		$dispatcher->removeSubscriber($this);
 		$dispatcher->addSubscriber($this);
 	}
 
