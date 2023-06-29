@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  * Representation of a serializable file. Only supports <code>UploadedFile</code> currently.
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class SerializableFile {
@@ -58,12 +58,6 @@ class SerializableFile {
 		file_put_contents($tempFile, base64_decode($this->content));
 
 		TempFileUtil::addTempFile($tempFile);
-
-		// avoid a deprecation notice regarding "passing a size as 4th argument to the constructor"
-		// TODO remove as soon as Symfony >= 4.1 is required
-		if (property_exists(UploadedFile::class, 'size')) {
-			return new UploadedFile($tempFile, $this->clientOriginalName, $this->clientMimeType, null, null, true);
-		}
 
 		return new UploadedFile($tempFile, $this->clientOriginalName, $this->clientMimeType, null, true);
 	}

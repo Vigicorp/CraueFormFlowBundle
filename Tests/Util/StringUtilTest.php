@@ -2,6 +2,7 @@
 
 namespace Craue\FormFlowBundle\Tests\Util;
 
+use Craue\FormFlowBundle\Exception\InvalidTypeException;
 use Craue\FormFlowBundle\Util\StringUtil;
 use PHPUnit\Framework\TestCase;
 
@@ -9,29 +10,27 @@ use PHPUnit\Framework\TestCase;
  * @group unit
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class StringUtilTest extends TestCase {
 
 	public function testGenerateRandomString() {
 		$this->assertEquals(1000, strlen(StringUtil::generateRandomString(1000)));
-		$this->assertRegExp('/^[a-zA-Z0-9-_]{1000}$/', StringUtil::generateRandomString(1000));
+		$this->assertMatchesRegularExpression('/^[a-zA-Z0-9-_]{1000}$/', StringUtil::generateRandomString(1000));
 		$this->assertNotEquals(StringUtil::generateRandomString(10), StringUtil::generateRandomString(10));
 	}
 
-	/**
-	 * @expectedException \Craue\FormFlowBundle\Exception\InvalidTypeException
-	 */
 	public function testGenerateRandomString_lengthNotInteger() {
+		$this->expectException(InvalidTypeException::class);
+
 		StringUtil::generateRandomString(null);
 	}
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 * @expectedExceptionMessage Length must be >= 0, "-1" given.
-	 */
 	public function testGenerateRandomString_lengthNegative() {
+		$this->expectException(\InvalidArgumentException::class);
+		$this->expectExceptionMessage('Length must be >= 0, "-1" given.');
+
 		StringUtil::generateRandomString(-1);
 	}
 
@@ -49,27 +48,24 @@ class StringUtilTest extends TestCase {
 		$this->assertFalse(StringUtil::isRandomString('=', 1));
 	}
 
-	/**
-	 * @expectedException \Craue\FormFlowBundle\Exception\InvalidTypeException
-	 * @expectedExceptionMessage Expected argument of type "string", but "NULL" given.
-	 */
 	public function testIsRandomString_inputNotString() {
+		$this->expectException(InvalidTypeException::class);
+		$this->expectExceptionMessage('Expected argument of type "string", but "NULL" given.');
+
 		StringUtil::isRandomString(null, 0);
 	}
 
-	/**
-	 * @expectedException \Craue\FormFlowBundle\Exception\InvalidTypeException
-	 * @expectedExceptionMessage Expected argument of type "int", but "NULL" given.
-	 */
 	public function testIsRandomString_lengthNotInteger() {
+		$this->expectException(InvalidTypeException::class);
+		$this->expectExceptionMessage('Expected argument of type "int", but "NULL" given.');
+
 		StringUtil::isRandomString('', null);
 	}
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 * @expectedExceptionMessage Length must be >= 0, "-1" given.
-	 */
 	public function testIsRandomString_lengthNegative() {
+		$this->expectException(\InvalidArgumentException::class);
+		$this->expectExceptionMessage('Length must be >= 0, "-1" given.');
+
 		StringUtil::isRandomString('', -1);
 	}
 
@@ -86,7 +82,6 @@ class StringUtilTest extends TestCase {
 
 	public function dataFqcnToFlowName() {
 		return [
-			[null, null],
 			['', null],
 			['Flow', 'flow'],
 			['Demo1', 'demo1'],
@@ -96,6 +91,13 @@ class StringUtilTest extends TestCase {
 			['MyCompany\MyBundle\Form\CreateLocation', 'createLocation'],
 			['MyCompany\MyBundle\Form\CreateLocationFlow', 'createLocation'],
 		];
+	}
+
+	public function testFqcnToFlowName_inputNotString() {
+		$this->expectException(InvalidTypeException::class);
+		$this->expectExceptionMessage('Expected argument of type "string", but "NULL" given.');
+
+		StringUtil::fqcnToFlowName(null);
 	}
 
 }

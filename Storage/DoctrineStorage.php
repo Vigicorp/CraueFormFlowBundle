@@ -7,12 +7,13 @@ use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 
 /**
  * Stores data in a Doctrine-managed database.
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class DoctrineStorage implements StorageInterface {
@@ -132,7 +133,14 @@ class DoctrineStorage implements StorageInterface {
 			->setParameter('key', $this->generateKey($key))
 		;
 
-		return $qb->execute()->fetchColumn();
+		$result = $qb->execute();
+
+		// TODO remove as soon as Doctrine DBAL >= 3.0 is required
+		if (!\method_exists($result, 'fetchOne')) {
+			return $result->fetchColumn();
+		}
+
+		return $result->fetchOne();
 	}
 
 	private function tableExists() {
@@ -140,10 +148,15 @@ class DoctrineStorage implements StorageInterface {
 	}
 
 	private function createTable() {
+		// TODO remove as soon as Doctrine DBAL >= 3.0 is required
+		$stringType = defined('Doctrine\DBAL\Types\Types::STRING') ? Types::STRING : Type::STRING;
+		$arrayType = defined('Doctrine\DBAL\Types\Types::ARRAY') ? Types::ARRAY : Type::TARRAY;
+
 		$table = new Table(self::TABLE, [
-			new Column($this->keyColumn, Type::getType(Type::STRING)),
-			new Column($this->valueColumn, Type::getType(Type::TARRAY)),
+			new Column($this->keyColumn, Type::getType($stringType)),
+			new Column($this->valueColumn, Type::getType($arrayType)),
 		]);
+
 		$table->setPrimaryKey([$this->keyColumn]);
 		$this->schemaManager->createTable($table);
 	}

@@ -2,14 +2,7 @@ parameters:
 	level: 5
 	paths:
 		- .
-	autoload_files:
-		# TODO remove as soon as Symfony >= 4.2 is required
-		- EventListener/FlowExpiredEventListener.php
-		- EventListener/PreviousStepInvalidEventListener.php
-		# TODO remove as soon as Symfony >= 5.0 is required
-		- Form/Extension/FormFlowFormExtension.php
-		- Form/Extension/FormFlowHiddenFieldExtension.php
-	excludes_analyse:
+	excludePaths:
 		- Tests/*
 		- vendor/*
 	treatPhpDocTypesAsCertain: false
@@ -17,45 +10,43 @@ parameters:
 		-
 			message: '#^Unsafe usage of new static\(\)\.$#'
 			path: Form/Step.php
-		# TODO remove as soon as PHP >= 7.1 is required
+		# TODO remove as soon as Symfony >= 5.0 is required
 		-
-			message: '#^Parameter \#1 \$function of function register_shutdown_function expects callable\(\): void, Closure\(\): mixed given\.$#'
-			path: CraueFormFlowBundle.php
-		# TODO remove as soon as Symfony >= 4.1 is required
-		- '#^Parameter \#5 \$test of class Symfony\\Component\\HttpFoundation\\File\\UploadedFile constructor expects bool, null given\.$#'
-		# TODO remove as soon as Symfony >= 4.1 is required
-		-
-			message: '#^Class Symfony\\Component\\HttpFoundation\\File\\UploadedFile constructor invoked with 6 parameters, 2-5 required\.$#'
-			path: Storage/SerializableFile.php
-		# TODO remove as soon as Symfony >= 4.2 is required
-		-
-			message: '#^Property Craue\\FormFlowBundle\\EventListener\\Base(FlowExpired|PreviousStepInvalid)EventListener::\$translator has unknown class Symfony\\Component\\Translation\\TranslatorInterface as its type\.$#'
+			message: '#^Property Craue\\FormFlowBundle\\EventListener\\(FlowExpired|PreviousStepInvalid)EventListener::\$translator has unknown class Symfony\\Component\\Translation\\TranslatorInterface as its type\.$#'
 			paths:
 				- EventListener/FlowExpiredEventListener.php
 				- EventListener/PreviousStepInvalidEventListener.php
-		# TODO remove as soon as Symfony >= 4.2 is required
+		# TODO remove as soon as Symfony >= 5.0 is required
 		-
-			message: '#^Parameter \$translator of method Craue\\FormFlowBundle\\EventListener\\(FlowExpired|PreviousStepInvalid)EventListener::setTranslator\(\) has invalid typehint type Symfony\\Component\\Translation\\TranslatorInterface\.$#'
+			message: '#^Parameter \$translator of method Craue\\FormFlowBundle\\EventListener\\(FlowExpired|PreviousStepInvalid)EventListener::setTranslator\(\) has invalid type Symfony\\Component\\Translation\\TranslatorInterface\.$#'
 			paths:
 				- EventListener/FlowExpiredEventListener.php
 				- EventListener/PreviousStepInvalidEventListener.php
-		# TODO remove as soon as Symfony >= 4.2 is required
+		# TODO remove as soon as Symfony >= 5.0 is required
+		-
+			message: '#^Class Symfony\\Component\\Translation\\TranslatorInterface not found\.$#'
+			paths:
+				- EventListener/FlowExpiredEventListener.php
+				- EventListener/PreviousStepInvalidEventListener.php
+		# TODO remove as soon as Symfony >= 5.0 is required
 		-
 			message: '#^Call to method trans\(\) on an unknown class Symfony\\Component\\Translation\\TranslatorInterface\.$#'
 			paths:
 				- EventListener/FlowExpiredEventListener.php
 				- EventListener/PreviousStepInvalidEventListener.php
-		# TODO remove as soon as Symfony >= 4.3 is required
+		# TODO remove as soon as Symfony >= 5.1 is required
 		-
-			message: '#^Comparison operation "<" between \d{5} and 40300 is always false\.$#'
-			paths:
-				- Event/FormFlowEvent.php
-				- Form/FormFlow.php
-		# TODO remove as soon as Symfony >= 4.3 is required
-		-
-			message: '#^Parameter \#1 \$event of method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface::dispatch\(\) expects object, string given\.$#'
+			message: '#^Parameter \#2 \$default of method Symfony\\Component\\HttpFoundation\\InputBag::get\(\) expects bool\|float\|int\|string\|null, array given\.$#'
 			path: Form/FormFlow.php
-		# TODO remove as soon as Symfony >= 4.3 is required
+		# TODO remove as soon as Symfony >= 5.3 is required
 		-
-			message: '#^Parameter \#2 \$eventName of method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface::dispatch\(\) expects string\|null, Craue\\FormFlowBundle\\Event\\FormFlowEvent given\.$#'
-			path: Form/FormFlow.php
+			message: '#^Call to an undefined method Symfony\\Component\\Security\\Core\\Authentication\\Token\\TokenInterface::getUsername\(\)\.$#'
+			path: Storage\UserSessionStorageKeyGenerator.php
+		# TODO remove as soon as Doctrine DBAL >= 3.0 is required
+		-
+			message: '#^Cannot call method fetchColumn\(\) on Doctrine\\DBAL\\Result\|int\.$#'
+			path: Storage/DoctrineStorage.php
+		# TODO remove as soon as Doctrine DBAL >= 3.0 is required
+		-
+			message: '#^Access to undefined constant Doctrine\\DBAL\\Types\\Type::(STRING|TARRAY)\.$#'
+			path: Storage/DoctrineStorage.php

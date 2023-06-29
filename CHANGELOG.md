@@ -1,5 +1,49 @@
 # Changelog
 
+## [3.6.0] – 2022-01-24
+
+- [#393]: added support for Symfony 6
+- dropped support for Symfony 3.4, 5.1, 5.2
+
+[#393]: https://github.com/craue/CraueFormFlowBundle/issues/393
+[3.6.0]: https://github.com/craue/CraueFormFlowBundle/compare/3.5.1...3.6.0
+
+## [3.5.1] – 2021-07-28
+
+- [#389]: fix file upload in collections
+
+[#389]: https://github.com/craue/CraueFormFlowBundle/issues/389
+[3.5.1]: https://github.com/craue/CraueFormFlowBundle/compare/3.5.0...3.5.1
+
+## [3.5.0] – 2021-05-31
+
+- [#387]: avoid several deprecation notices with Symfony >= 5.3
+- dropped support for Symfony 5.1
+
+[#387]: https://github.com/craue/CraueFormFlowBundle/issues/387
+[3.5.0]: https://github.com/craue/CraueFormFlowBundle/compare/3.4.1...3.5.0
+
+## [3.4.1] – 2021-03-31
+
+- [#386]: revert to clean class definitions for event listeners
+- avoid deprecation notices regarding `Symfony\Component\HttpFoundation\InputBag::get()` with Symfony >= 5.1
+
+[#386]: https://github.com/craue/CraueFormFlowBundle/issues/386
+[3.4.1]: https://github.com/craue/CraueFormFlowBundle/compare/3.4.0...3.4.1
+
+## [3.4.0] – 2020-12-17
+
+- [#359]: use DataManager to check if current flow exists
+- [#368]: fix opcache preloading
+- added DoctrineStorage support for Doctrine DBAL 3.0
+- added support for PHP 8.0
+- dropped support for PHP 7.0, 7.1, 7.2
+- dropped support for Symfony 4.2, 4.3, 5.0
+
+[#359]: https://github.com/craue/CraueFormFlowBundle/issues/359
+[#368]: https://github.com/craue/CraueFormFlowBundle/issues/368
+[3.4.0]: https://github.com/craue/CraueFormFlowBundle/compare/3.3.2...3.4.0
+
 ## [3.3.2] – 2020-05-07
 
 - [#355]: avoid infinite loop when all steps are skipped

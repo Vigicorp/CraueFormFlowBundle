@@ -6,7 +6,7 @@ use Craue\FormFlowBundle\Exception\InvalidTypeException;
 
 /**
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 abstract class StringUtil {
@@ -55,6 +55,10 @@ abstract class StringUtil {
 	 * @return string|null flow name or null if not a FQCN
 	 */
 	public static function fqcnToFlowName($fqcn) {
+		if (!is_string($fqcn)) {
+			throw new InvalidTypeException($fqcn, 'string');
+		}
+
 		if (preg_match('/([^\\\\]+?)(flow)?$/i', $fqcn, $matches)) {
 			return lcfirst(preg_replace('/([A-Z]+)([A-Z][a-z])/', '\\1\\2', $matches[1]));
 		}

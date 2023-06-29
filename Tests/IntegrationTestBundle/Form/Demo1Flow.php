@@ -15,10 +15,12 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class Demo1Flow extends FormFlow implements EventSubscriberInterface {
+
+	use LogEventCallsTrait;
 
 	/**
 	 * {@inheritDoc}
@@ -33,7 +35,7 @@ class Demo1Flow extends FormFlow implements EventSubscriberInterface {
 	/**
 	 * {@inheritDoc}
 	 */
-	public static function getSubscribedEvents() {
+	public static function getSubscribedEvents() : array {
 		return [
 			FormFlowEvents::PRE_BIND => 'onPreBind',
 			FormFlowEvents::GET_STEPS => 'onGetSteps',
@@ -73,18 +75,9 @@ class Demo1Flow extends FormFlow implements EventSubscriberInterface {
 	 * {@inheritDoc}
 	 */
 	public function bind($formData) {
-		$this->dataManager->getStorage()->set($this->getCalledEventsSessionKey(), []);
+		$this->clearLoggedEventCalls();
+
 		parent::bind($formData);
-	}
-
-	public function getCalledEventsSessionKey() {
-		return $this->getId() . '_debug_events_called';
-	}
-
-	protected function logEventCall($name) {
-		$calledEvents = $this->dataManager->getStorage()->get($this->getCalledEventsSessionKey());
-		$calledEvents[] = $name;
-		$this->dataManager->getStorage()->set($this->getCalledEventsSessionKey(), $calledEvents);
 	}
 
 	public function onPreBind(PreBindEvent $event) {

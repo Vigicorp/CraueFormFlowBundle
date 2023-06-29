@@ -2,6 +2,8 @@
 
 namespace Craue\FormFlowBundle\Tests\Form;
 
+use Craue\FormFlowBundle\Exception\InvalidTypeException;
+use Craue\FormFlowBundle\Exception\StepLabelCallableInvalidReturnValueException;
 use Craue\FormFlowBundle\Form\StepLabel;
 use Craue\FormFlowBundle\Tests\UnitTestCase;
 
@@ -9,7 +11,7 @@ use Craue\FormFlowBundle\Tests\UnitTestCase;
  * @group unit
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class StepLabelTest extends UnitTestCase {
@@ -31,9 +33,10 @@ class StepLabelTest extends UnitTestCase {
 
 	/**
 	 * @dataProvider dataCreateStringLabel_invalidArgument
-	 * @expectedException \Craue\FormFlowBundle\Exception\InvalidTypeException
 	 */
 	public function testCreateStringLabel_invalidArgument($value) {
+		$this->expectException(InvalidTypeException::class);
+
 		StepLabel::createStringLabel($value);
 	}
 
@@ -62,9 +65,10 @@ class StepLabelTest extends UnitTestCase {
 
 	/**
 	 * @dataProvider dataCreateCallableLabel_invalidArgument
-	 * @expectedException \InvalidArgumentException
 	 */
 	public function testCreateCallableLabel_invalidArgument($value) {
+		$this->expectException(\InvalidArgumentException::class);
+
 		StepLabel::createCallableLabel($value)->getText();
 	}
 
@@ -78,9 +82,10 @@ class StepLabelTest extends UnitTestCase {
 
 	/**
 	 * @dataProvider dataGetText_callableInvalidReturnValue
-	 * @expectedException Craue\FormFlowBundle\Exception\StepLabelCallableInvalidReturnValueException
 	 */
 	public function testGetText_callableInvalidReturnValue($value) {
+		$this->expectException(StepLabelCallableInvalidReturnValueException::class);
+
 		StepLabel::createCallableLabel($value)->getText();
 	}
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
 	Author: Christian Raue <christian.raue@gmail.com>
-	Copyright: 2011-2020 Christian Raue
+	Copyright: 2011-2022 Christian Raue
 	License: http://opensource.org/licenses/mit-license.php MIT License
 -->
 <container
@@ -14,5 +14,8 @@
 
 	<services>
 		<service id="craue_formflow_util" class="%craue_formflow.util.class%" public="true" />
+
+		<!-- autowiring alias -->
+		<service id="Craue\FormFlowBundle\Util\FormFlowUtil" alias="craue_formflow_util" public="false" />
 	</services>
 </container>

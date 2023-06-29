@@ -2,11 +2,13 @@
 
 namespace Craue\FormFlowBundle\Tests;
 
+use Symfony\Component\HttpKernel\Kernel;
+
 /**
  * @group integration
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class CreateVehicleFlowTest extends IntegrationTestCase {
@@ -226,14 +228,14 @@ class CreateVehicleFlowTest extends IntegrationTestCase {
 		]);
 		$this->assertCurrentStepNumber(3, $crawler);
 		// step 2 must be marked as skipped
-		$this->assertContains('<li class="craue_formflow_skipped_step">engine</li>', $this->getHtml($crawler->filter('#step-list')));
+		$this->assertStringContainsString('<li class="craue_formflow_skipped_step">engine</li>', $this->getHtml($crawler->filter('#step-list')));
 
 		// go back
 		$form = $crawler->selectButton('back')->form();
 		$crawler = static::$client->submit($form);
 		$this->assertCurrentStepNumber(1, $crawler);
 		// step 2 must not be marked as skipped
-		$this->assertContains('<li>engine</li>', $this->getHtml($crawler->filter('#step-list')));
+		$this->assertStringContainsString('<li>engine</li>', $this->getHtml($crawler->filter('#step-list')));
 	}
 
 	public function testCreateVehicle_submitInvalidValues() {
@@ -246,7 +248,7 @@ class CreateVehicleFlowTest extends IntegrationTestCase {
 			'createVehicle[numberOfWheels]' => 99,
 		]);
 		$this->assertCurrentStepNumber(1, $crawler);
-		$this->assertContainsFormError('This value is not valid.', $crawler);
+		$this->assertContainsFormError(Kernel::VERSION_ID < 60000 ? 'This value is not valid.' : 'The selected choice is invalid.', $crawler); // TODO cleanup as soon as Symfony >= 6.0 is required
 
 		// 4 wheels -> step 2
 		$form = $crawler->selectButton('next')->form();
@@ -262,7 +264,7 @@ class CreateVehicleFlowTest extends IntegrationTestCase {
 			'createVehicle[engine]' => 'magic',
 		]);
 		$this->assertCurrentStepNumber(2, $crawler);
-		$this->assertContainsFormError('This value is not valid.', $crawler);
+		$this->assertContainsFormError(Kernel::VERSION_ID < 60000 ? 'This value is not valid.' : 'The selected choice is invalid.', $crawler); // TODO cleanup as soon as Symfony >= 6.0 is required
 	}
 
 }

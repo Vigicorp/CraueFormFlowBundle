@@ -2,15 +2,15 @@
 
 namespace Craue\FormFlowBundle\Tests;
 
-use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Twig\Environment;
 
 /**
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 abstract class IntegrationTestCase extends WebTestCase {
@@ -19,8 +19,7 @@ abstract class IntegrationTestCase extends WebTestCase {
 	const ENV_FLOWS_WITH_PARENT_SERVICE = 'flows_with_parent_service';
 
 	/**
-	 * @var AbstractBrowser|Client|null
-	 * TODO remove Client type as soon as Symfony >= 4.3 is required
+	 * @var AbstractBrowser|null
 	 */
 	protected static $client;
 
@@ -37,7 +36,7 @@ abstract class IntegrationTestCase extends WebTestCase {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected static function createKernel(array $options = []) {
+	protected static function createKernel(array $options = []) : KernelInterface {
 		$environment = $options['environment'] ?? self::ENV_FLOWS_WITH_AUTOCONFIGURATION;
 		$configFile = $options['config'] ?? sprintf('config_%s.yml', $environment);
 
@@ -47,7 +46,7 @@ abstract class IntegrationTestCase extends WebTestCase {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected function setUp() {
+	protected function setUp() : void {
 		$this->setUpClient();
 	}
 
@@ -60,14 +59,19 @@ abstract class IntegrationTestCase extends WebTestCase {
 	 * @return object The associated service.
 	 */
 	protected function getService($id) {
-		return static::$kernel->getContainer()->get($id);
+		// TODO remove as soon as Symfony >= 5.3 is required
+		if (!method_exists($this, 'getContainer')) {
+			return static::$kernel->getContainer()->get($id);
+		}
+
+		return static::getContainer()->get($id);
 	}
 
 	/**
 	 * @return Environment
 	 */
 	protected function getTwig() {
-		return $this->getService('twig');
+		return $this->getService('twig.test');
 	}
 
 	/**
@@ -118,11 +122,19 @@ abstract class IntegrationTestCase extends WebTestCase {
 	}
 
 	/**
+	 * @param int $expectedCount
+	 * @param Crawler $crawler
+	 */
+	protected function assertRenderedImageCollectionCount($expectedCount, Crawler $crawler) {
+		$this->assertEquals($expectedCount, $this->getNodeText('#rendered-images-count', $crawler));
+	}
+
+	/**
 	 * @param string $expectedError
 	 * @param Crawler $crawler
 	 */
 	protected function assertContainsFormError($expectedError, Crawler $crawler) {
-		$this->assertContains($expectedError, $this->getNodeText('form', $crawler));
+		$this->assertStringContainsString($expectedError, $this->getNodeText('form', $crawler));
 	}
 
 	/**
@@ -130,7 +142,7 @@ abstract class IntegrationTestCase extends WebTestCase {
 	 * @param Crawler $crawler
 	 */
 	protected function assertNotContainsFormError($unexpectedError, Crawler $crawler) {
-		$this->assertNotContains($unexpectedError, $this->getNodeText('form', $crawler));
+		$this->assertStringNotContainsString($unexpectedError, $this->getNodeText('form', $crawler));
 	}
 
 	/**

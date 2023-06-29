@@ -6,7 +6,7 @@ namespace Craue\FormFlowBundle\Tests;
  * @group integration
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class SkipFirstStepUsingClosureFlowTest extends IntegrationTestCase {
@@ -16,14 +16,14 @@ class SkipFirstStepUsingClosureFlowTest extends IntegrationTestCase {
 		$this->assertSame(200, static::$client->getResponse()->getStatusCode());
 		$this->assertCurrentStepNumber(2, $crawler);
 		// step 1 must be marked as skipped
-		$this->assertContains('<li class="craue_formflow_skipped_step">step1</li>', $this->getHtml($crawler->filter('#step-list')));
+		$this->assertStringContainsString('<li class="craue_formflow_skipped_step">step1</li>', $this->getHtml($crawler->filter('#step-list')));
 
 		// reset
 		$form = $crawler->selectButton('start over')->form();
 		$crawler = static::$client->submit($form);
 		$this->assertCurrentStepNumber(2, $crawler);
 		// step 1 must be marked as skipped
-		$this->assertContains('<li class="craue_formflow_skipped_step">step1</li>', $this->getHtml($crawler->filter('#step-list')));
+		$this->assertStringContainsString('<li class="craue_formflow_skipped_step">step1</li>', $this->getHtml($crawler->filter('#step-list')));
 	}
 
 }

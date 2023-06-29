@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
  * @group unit
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class TempFileUtilTest extends TestCase {
@@ -27,7 +27,7 @@ class TempFileUtilTest extends TestCase {
 
 		TempFileUtil::removeTempFiles();
 		$this->assertCount(0, $this->getTempFiles());
-		$this->assertFileNotExists($tempFile);
+		$this->assertFileDoesNotExist($tempFile);
 	}
 
 	private function getTempFiles() {

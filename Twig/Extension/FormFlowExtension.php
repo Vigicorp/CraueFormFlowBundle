@@ -12,7 +12,7 @@ use Twig\TwigFunction;
  * Twig extension for form flows.
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class FormFlowExtension extends AbstractExtension {
@@ -36,7 +36,7 @@ class FormFlowExtension extends AbstractExtension {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function getFilters() {
+	public function getFilters() : array {
 		return [
 			new TwigFilter('craue_addDynamicStepNavigationParameters', [$this, 'addDynamicStepNavigationParameters']),
 			new TwigFilter('craue_removeDynamicStepNavigationParameters', [$this, 'removeDynamicStepNavigationParameters']),
@@ -49,7 +49,7 @@ class FormFlowExtension extends AbstractExtension {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function getFunctions() {
+	public function getFunctions() : array {
 		return [
 			new TwigFunction('craue_isStepLinkable', [$this, 'isStepLinkable']),
 		];

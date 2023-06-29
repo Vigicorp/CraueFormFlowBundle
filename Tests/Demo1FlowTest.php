@@ -8,7 +8,7 @@ use Craue\FormFlowBundle\Tests\IntegrationTestBundle\Form\Demo1Flow;
  * @group integration
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class Demo1FlowTest extends IntegrationTestCase {
@@ -60,12 +60,11 @@ class Demo1FlowTest extends IntegrationTestCase {
 		$this->assertJsonResponse('{}');
 	}
 
-	protected function getCalledEvents() {
+	private function getCalledEvents() {
 		$container = static::$kernel->getContainer();
 		$flow = $container->get(Demo1Flow::class);
-		$storage = $container->get('craue.form.flow.storage');
 
-		return $storage->get($flow->getCalledEventsSessionKey());
+		return $flow->getLoggedEventCalls();
 	}
 
 }

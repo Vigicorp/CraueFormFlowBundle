@@ -21,14 +21,13 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Validator\Constraints\GroupSequence;
 
 /**
  * @author Christian Raue <christian.raue@gmail.com>
  * @author Marcus Stöhr <dafish@soundtrack-board.de>
  * @author Toni Uebernickel <tuebernickel@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 abstract class FormFlow implements FormFlowInterface {
@@ -172,12 +171,6 @@ abstract class FormFlow implements FormFlowInterface {
 	 * @var bool
 	 */
 	private $expired = false;
-
-	/**
-	 * Instance ID was a newly generated ID.
-	 * @var bool
-	 */
-	private $newInstance = false;
 
 	/**
 	 * {@inheritDoc}
@@ -490,7 +483,6 @@ abstract class FormFlow implements FormFlowInterface {
 	public function reset() {
 		$this->dataManager->drop($this);
 		$this->currentStepNumber = $this->getFirstStepNumber();
-		$this->newInstance = true;
 
 		// re-evaluate to not keep steps marked as skipped when resetting
 		foreach ($this->getSteps() as $step) {
@@ -551,7 +543,7 @@ abstract class FormFlow implements FormFlowInterface {
 
 	public function getRequestedTransition() {
 		if (empty($this->transition)) {
-			$this->transition = strtolower($this->getRequest()->request->get($this->getFormTransitionKey()));
+			$this->transition = strtolower($this->getRequest()->request->get($this->getFormTransitionKey(), ''));
 		}
 
 		return $this->transition;
@@ -643,7 +635,7 @@ abstract class FormFlow implements FormFlowInterface {
 			$this->dispatchEvent(new PostBindFlowEvent($this, $this->formData), FormFlowEvents::POST_BIND_FLOW);
 		}
 
-		if ($this->newInstance) {
+		if (!$this->dataManager->exists($this)) {
 			// initialize storage slot
 			$this->dataManager->save($this, []);
 		}
@@ -664,7 +656,6 @@ abstract class FormFlow implements FormFlowInterface {
 		$instanceIdLength = 10;
 		if ($instanceId === null || !StringUtil::isRandomString($instanceId, $instanceIdLength)) {
 			$instanceId = StringUtil::generateRandomString($instanceIdLength);
-			$this->newInstance = true;
 		}
 
 		return $instanceId;
@@ -735,13 +726,18 @@ abstract class FormFlow implements FormFlowInterface {
 		$request = $this->getRequest();
 		$formName = $form->getName();
 
-		$currentStepData = $request->request->get($formName, []);
-
-		if ($this->handleFileUploads) {
-			$currentStepData = array_merge_recursive($currentStepData, $request->files->get($formName, []));
+		if (!\class_exists('Symfony\Component\HttpFoundation\InputBag')) {
+			// TODO remove as soon as Symfony >= 5.1 is required
+			$currentStepData = $request->request->get($formName, []);
+		} else {
+			$currentStepData = $request->request->all($formName);
 		}
 
-		$stepData[$this->currentStepNumber] = $currentStepData;
+		if ($this->handleFileUploads) {
+			$currentStepData = array_replace_recursive($currentStepData, $request->files->get($formName, []));
+		}
+
+		$stepData[$this->getCurrentStepNumber()] = $currentStepData;
 
 		$this->saveStepData($stepData);
 	}
@@ -1042,12 +1038,7 @@ abstract class FormFlow implements FormFlowInterface {
 	 * @param string $eventName
 	 */
 	private function dispatchEvent($event, $eventName) {
-		if (Kernel::VERSION_ID < 40300) {
-			// TODO remove as soon as Symfony >= 4.3 is required
-			$this->eventDispatcher->dispatch($eventName, $event);
-		} else {
-			$this->eventDispatcher->dispatch($event, $eventName);
-		}
+		$this->eventDispatcher->dispatch($event, $eventName);
 	}
 
 	/**

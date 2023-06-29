@@ -2,6 +2,7 @@
 
 namespace Craue\FormFlowBundle\Tests\Storage;
 
+use Craue\FormFlowBundle\Exception\InvalidTypeException;
 use Craue\FormFlowBundle\Storage\SerializableFile;
 use Craue\FormFlowBundle\Util\TempFileUtil;
 use PHPUnit\Framework\TestCase;
@@ -12,7 +13,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  * @group unit
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class SerializableFileTest extends TestCase {
@@ -21,7 +22,7 @@ class SerializableFileTest extends TestCase {
 
 	private $tempFolder = null;
 
-	protected function tearDown() {
+	protected function tearDown() : void {
 		TempFileUtil::removeTempFiles();
 
 		if ($this->tempFolder !== null && is_dir($this->tempFolder)) {
@@ -76,11 +77,10 @@ class SerializableFileTest extends TestCase {
 		$this->assertEquals(realpath(sys_get_temp_dir()), realpath($processedUploadedFile->getPath()));
 	}
 
-	/**
-	 * @expectedException \Craue\FormFlowBundle\Exception\InvalidTypeException
-	 * @expectedExceptionMessage Expected argument of type "Symfony\Component\HttpFoundation\File\UploadedFile", but "Symfony\Component\HttpFoundation\File\File" given.
-	 */
 	public function testSerialization_unsupportedType() {
+		$this->expectException(InvalidTypeException::class);
+		$this->expectExceptionMessage('Expected argument of type "Symfony\Component\HttpFoundation\File\UploadedFile", but "Symfony\Component\HttpFoundation\File\File" given.');
+
 		new SerializableFile(new File(__FILE__));
 	}
 
@@ -96,12 +96,6 @@ class SerializableFileTest extends TestCase {
 	 * @return UploadedFile
 	 */
 	private function getNewUploadedFile($document, $originalName, $mimeType = null) {
-		// avoid a deprecation notice regarding "passing a size as 4th argument to the constructor"
-		// TODO remove as soon as Symfony >= 4.1 is required
-		if (property_exists(UploadedFile::class, 'size')) {
-			return new UploadedFile($document, $originalName, $mimeType, null, null, true);
-		}
-
 		return new UploadedFile($document, $originalName, $mimeType, null, true);
 	}
 

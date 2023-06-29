@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 abstract class UnitTestCase extends TestCase {
@@ -35,7 +35,7 @@ abstract class UnitTestCase extends TestCase {
 	 * @return MockObject|FormFlow
 	 */
 	protected function getFlowWithMockedMethods(array $methodNames) {
-		return $this->getMockBuilder(FormFlow::class)->setMethods($methodNames)->getMock();
+		return $this->getMockBuilder(FormFlow::class)->onlyMethods($methodNames)->getMock();
 	}
 
 	/**

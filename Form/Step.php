@@ -8,7 +8,7 @@ use Symfony\Component\Form\FormTypeInterface;
 
 /**
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class Step implements StepInterface {
@@ -191,7 +191,7 @@ class Step implements StepInterface {
 	 */
 	public function evaluateSkipping($estimatedCurrentStepNumber, FormFlowInterface $flow) {
 		if ($this->skipFunction !== null) {
-			$returnValue = call_user_func_array($this->skipFunction, [$estimatedCurrentStepNumber, $flow]);
+			$returnValue = ($this->skipFunction)(...[$estimatedCurrentStepNumber, $flow]);
 
 			if (!is_bool($returnValue)) {
 				throw new \RuntimeException(sprintf('The skip callable for step %d did not return a boolean value.',

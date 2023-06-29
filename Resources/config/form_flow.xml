@@ -2,7 +2,7 @@
 <!--
 	Author: Christian Raue <christian.raue@gmail.com>
 	Author: Marcus Stöhr <dafish@soundtrack-board.de>
-	Copyright: 2011-2020 Christian Raue
+	Copyright: 2011-2022 Christian Raue
 	License: http://opensource.org/licenses/mit-license.php MIT License
 -->
 <container
@@ -20,7 +20,7 @@
 
 	<services>
 		<service id="craue.form.flow.storage_default" class="%craue.form.flow.storage.class%" public="false">
-			<argument type="service" id="session" />
+			<argument type="service" id="request_stack" />
 		</service>
 
 		<service id="craue.form.flow.storage" alias="craue.form.flow.storage_default" public="true" />

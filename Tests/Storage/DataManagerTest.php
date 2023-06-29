@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
  * @group unit
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class DataManagerTest extends UnitTestCase {
@@ -62,7 +62,7 @@ class DataManagerTest extends UnitTestCase {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected function setUp() {
+	protected function setUp() : void {
 		$this->storage = new SessionStorage(new Session(new MockArraySessionStorage()));
 		$this->dataManager = new DataManager($this->storage);
 	}

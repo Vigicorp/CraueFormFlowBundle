@@ -2,6 +2,9 @@ imports:
   - { resource: '@CraueFormFlowBundle/Resources/config/form_flow.xml' }
   - { resource: '@IntegrationTestBundle/Resources/config/controller.xml' }
   - { resource: parameters.php }
+  - { resource: config_hacks.php }
+  # workaround for symfony/framework-bundle not loading its annotations config when doctrine/annotations is installed only as a dev dependency
+  - { resource: '@FrameworkBundle/Resources/config/annotations.*' }
 
 framework:
   csrf_protection: ~
@@ -9,8 +12,6 @@ framework:
   router:
     resource: '%kernel.project_dir%/Tests/config/routing.yml'
   secret: whatever
-  session:
-    storage_id: session.storage.mock_file
   test: ~
   translator:
     fallback: en
@@ -24,9 +25,13 @@ security:
   firewalls:
     dummy:
       pattern: .*
-      anonymous: ~
 
 twig:
   debug: '%kernel.debug%'
   strict_variables: '%kernel.debug%'
   exception_controller: ~
+
+services:
+  twig.test:
+    alias: twig
+    public: true

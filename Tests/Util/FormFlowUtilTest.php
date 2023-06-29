@@ -9,7 +9,7 @@ use Craue\FormFlowBundle\Util\FormFlowUtil;
  * @group unit
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2020 Christian Raue
+ * @copyright 2011-2022 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class FormFlowUtilTest extends UnitTestCase {
@@ -22,7 +22,7 @@ class FormFlowUtilTest extends UnitTestCase {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected function setUp() {
+	protected function setUp() : void {
 		$this->util = new FormFlowUtil();
 	}
 

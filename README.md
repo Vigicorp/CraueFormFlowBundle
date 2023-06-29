@@ -1,6 +1,6 @@
 # Information
 
-[![Build Status](https://travis-ci.org/craue/CraueFormFlowBundle.svg?branch=master)](https://travis-ci.org/craue/CraueFormFlowBundle)
+[![Build Status](https://app.travis-ci.com/craue/CraueFormFlowBundle.svg?branch=master)](https://app.travis-ci.com/craue/CraueFormFlowBundle)
 [![Coverage Status](https://coveralls.io/repos/github/craue/CraueFormFlowBundle/badge.svg?branch=master)](https://coveralls.io/github/craue/CraueFormFlowBundle?branch=master)
 
 CraueFormFlowBundle provides a facility for building and handling multi-step forms in your Symfony project.
@@ -365,7 +365,7 @@ public function createVehicleAction() {
 
 			$flow->reset(); // remove step data from the session
 
-			return $this->redirect($this->generateUrl('home')); // redirect when done
+			return $this->redirectToRoute('home'); // redirect when done
 		}
 	}
 
@@ -634,7 +634,7 @@ public function createVehicleAction() {
 		$params = $this->get('craue_formflow_util')->addRouteParameters(array_merge($request->query->all(),
 				$request->attributes->get('_route_params')), $flow);
 
-		return $this->redirect($this->generateUrl($request->attributes->get('_route'), $params));
+		return $this->redirectToRoute($request->attributes->get('_route'), $params);
 	}
 
 	// ...
