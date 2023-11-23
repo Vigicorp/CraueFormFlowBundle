@@ -149,7 +149,7 @@ abstract class FormFlow implements FormFlowInterface {
 	 * @var int|null Is only null if not yet initialized.
 	 */
 	private $currentStepNumber = null;
- 
+
 	/**
 	 * @var int Define the default step number
 	 */
@@ -338,7 +338,7 @@ abstract class FormFlow implements FormFlowInterface {
 
 		return $this->currentStepNumber;
 	}
- 
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -346,7 +346,7 @@ abstract class FormFlow implements FormFlowInterface {
 	{
 		return $this->defaultStepNumber;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -852,11 +852,11 @@ abstract class FormFlow implements FormFlowInterface {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function getSteps() {
-		// The steps have been loaded already.
-		if ($this->steps !== null) {
-			return $this->steps;
-		}
+    public function getSteps(bool $forceReload = false) {
+        // The steps have been loaded already.
+        if (!$forceReload && $this->steps !== null) {
+            return $this->steps;
+        }
 
 		if ($this->hasListeners(FormFlowEvents::GET_STEPS)) {
 			$event = new GetStepsEvent($this);
