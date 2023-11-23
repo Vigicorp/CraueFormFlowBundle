@@ -131,11 +131,6 @@ abstract class FormFlow implements FormFlowInterface {
 	private $steps = null;
 
 	/**
-	 * @var int|null Is only null if not yet initialized.
-	 */
-	private $stepCount = null;
-
-	/**
 	 * @var string[]|null Is only null if not yet initialized.
 	 */
 	private $stepLabels = null;
@@ -310,11 +305,7 @@ abstract class FormFlow implements FormFlowInterface {
 	 * {@inheritDoc}
 	 */
 	public function getStepCount() {
-		if ($this->stepCount === null) {
-			$this->stepCount = count($this->getSteps());
-		}
-
-		return $this->stepCount;
+		return count($this->getSteps());
 	}
 
 	/**
@@ -452,8 +443,10 @@ abstract class FormFlow implements FormFlowInterface {
 		if ($direction !== 1 && $direction !== -1) {
 			throw new \InvalidArgumentException(sprintf('Argument of either -1 or 1 expected, "%s" given.', $direction));
 		}
-
+//dump($stepNumber);
 		$stepNumber = $this->ensureStepNumberRange($stepNumber);
+//dump($stepNumber);
+//dump($this->isStepSkipped($stepNumber));
 
 		if ($this->isStepSkipped($stepNumber)) {
 			$stepNumber += $direction;
@@ -474,6 +467,7 @@ abstract class FormFlow implements FormFlowInterface {
 			return $this->applySkipping($stepNumber, $direction, $boundsReached);
 		}
 
+//dump($stepNumber);
 		return $stepNumber;
 	}
 
@@ -509,10 +503,17 @@ abstract class FormFlow implements FormFlowInterface {
 	 */
 	public function nextStep() {
 		$currentStepNumber = $this->currentStepNumber + 1;
-
+        //dump($this);
+        //dump($this->getSteps());
 		foreach ($this->getSteps() as $step) {
 			$step->evaluateSkipping($currentStepNumber, $this);
 		}
+
+        //dump($this->getSteps());
+        //dump($currentStepNumber);
+        dump($this->getStepCount());
+        dump($currentStepNumber);
+        dump($this->getLastStepNumber());
 
 		// There is no "next" step as the target step exceeds the actual step count.
 		if ($currentStepNumber > $this->getLastStepNumber()) {
@@ -520,6 +521,7 @@ abstract class FormFlow implements FormFlowInterface {
 		}
 
 		$currentStepNumber = $this->applySkipping($currentStepNumber);
+        dump($this->getStepCount());
 
 		if ($currentStepNumber <= $this->getStepCount()) {
 			$this->currentStepNumber = $currentStepNumber;
