@@ -2,7 +2,7 @@
 
 namespace Craue\FormFlowBundle\Storage;
 
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Stores data in the session.
@@ -14,40 +14,40 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 class SessionStorage implements StorageInterface {
 
 	/**
-	 * @var SessionInterface
+	 * @var RequestStack
 	 */
-	protected $session;
+	protected $requestStack;
 
-	public function __construct(SessionInterface $session) {
-		$this->session = $session;
+	public function __construct(RequestStack $requestStack) {
+		$this->requestStack = $requestStack;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public function set($key, $value) {
-		$this->session->set($key, $value);
+		$this->requestStack->getSession()->set($key, $value);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public function get($key, $default = null) {
-		return $this->session->get($key, $default);
+		return $this->requestStack->getSession()->get($key, $default);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public function has($key) {
-		return $this->session->has($key);
+		return $this->requestStack->getSession()->has($key);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public function remove($key) {
-		$this->session->remove($key);
+		$this->requestStack->getSession()->remove($key);
 	}
 
 }
