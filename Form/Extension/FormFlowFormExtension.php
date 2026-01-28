@@ -16,18 +16,20 @@ abstract class BaseFormFlowFormExtension extends AbstractTypeExtension {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function getExtendedType() {
+	public function getExtendedType(): string
+    {
 		return FormType::class;
 	}
 
-	public static function _getExtendedTypes() {
+	public static function _getExtendedTypes(): array
+    {
 		return [FormType::class];
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$resolver->setDefined([
 			'flow_instance',
 			'flow_instance_key',
@@ -39,7 +41,7 @@ abstract class BaseFormFlowFormExtension extends AbstractTypeExtension {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		if (array_key_exists('flow_instance', $options) && array_key_exists('flow_instance_key', $options)) {
 			$builder->add($options['flow_instance_key'], HiddenType::class, [
 				'data' => $options['flow_instance'],

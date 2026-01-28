@@ -16,18 +16,20 @@ abstract class BaseFormFlowHiddenFieldExtension extends AbstractTypeExtension {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function getExtendedType() {
+	public function getExtendedType(): string
+    {
 		return HiddenType::class;
 	}
 
-	public static function _getExtendedTypes() {
+	public static function _getExtendedTypes(): array
+    {
 		return [HiddenType::class];
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$resolver->setDefined([
 			'flow_instance_key',
 			'flow_step_key',
@@ -37,7 +39,7 @@ abstract class BaseFormFlowHiddenFieldExtension extends AbstractTypeExtension {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function finishView(FormView $view, FormInterface $form, array $options) {
+	public function finishView(FormView $view, FormInterface $form, array $options): void {
 		if (array_key_exists('flow_instance_key', $options) && $view->vars['name'] === $options['flow_instance_key']) {
 			$view->vars['value'] = $options['data'];
 			$view->vars['full_name'] = $options['flow_instance_key'];
@@ -60,7 +62,8 @@ if (!method_exists(AbstractTypeExtension::class, 'getExtendedTypes')) {
 	 * @license http://opensource.org/licenses/mit-license.php MIT License
 	 */
 	class FormFlowHiddenFieldExtension extends BaseFormFlowHiddenFieldExtension {
-		public static function getExtendedTypes() {
+		public static function getExtendedTypes(): array
+        {
 			return self::_getExtendedTypes();
 		}
 	}
